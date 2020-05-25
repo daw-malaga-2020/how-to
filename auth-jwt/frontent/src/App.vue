@@ -17,6 +17,11 @@
     <div v-else>
       <button @click="getOrders">Realizar llamada autenticada</button>
       <button @click="logout">Logout</button>
+
+      <ul>
+        <li v-for="item in orders">Pedido {{item.title}} de {{item.user}}</li>
+      </ul>
+
     </div>
   </div>
 </template>
@@ -29,7 +34,8 @@ export default {
     return {
       isAuth: false,
       user: "alex@test.es",
-      pass: "test"
+      pass: "test",
+      orders: [],
     }
   },
   mounted() {
@@ -42,8 +48,8 @@ export default {
             'Authorization': `Bearer ${window.localStorage.getItem("token")}`
         }
       }
-      let response = await this.$http.get("https://pizza-delicious-api.herokuapp.com/orders", config)
-      console.log(response.data)
+      let response = await this.$http.get("http://localhost:3000/orders", config)
+      this.orders = response.data
     },
     checkAuth(){
       this.isAuth = window.localStorage.getItem("token")
@@ -58,7 +64,7 @@ export default {
         password: this.pass
       }
       try{
-        let response = await this.$http.post("https://pizza-delicious-api.herokuapp.com/auth/login", loginData)
+        let response = await this.$http.post("http://localhost:3000/auth/login", loginData)
         window.localStorage.setItem("token",response.data.token)
         this.checkAuth()
       }catch(e){
