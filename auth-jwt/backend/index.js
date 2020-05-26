@@ -5,12 +5,25 @@ const express = require("express");
 const bearerToken = require("express-bearer-token");
 const mustAuth = require("./middlewares/mustAuth");
 const jwt = require("jsonwebtoken");
+const firebase = require("firebase");
 const cors = require("cors");
 const { json } = require("express");
 const Order = require("./models/orders");
 const app = express();
 
 const JWT_PASSWORD = "supersecretpassword";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDepPtuqXIYAXQCLjx4myMMsn4UyrNn6TQ",
+  authDomain: "fir-ad324.firebaseapp.com",
+  databaseURL: "https://fir-ad324.firebaseio.com",
+  projectId: "fir-ad324",
+  storageBucket: "fir-ad324.appspot.com",
+  messagingSenderId: "749478724956",
+  appId: "1:749478724956:web:4fb0f9f091f2d70f9a2d99",
+};
+
+firebase.initializeApp(firebaseConfig);
 
 app.use(json());
 app.use(cors());
@@ -19,26 +32,36 @@ app.use(bearerToken());
 // Login : [POST] /auth/login
 // Orders: [GET] /orders
 
-app.post("/auth/login", (req, res) => {
+async function checkEmailAndPassword(email, pass) {
+  let auth = await firebase.auth().signInWithEmailAndPassword(email, pass);
+  return auth;
+}
+
+app.post("/auth/login", async (req, res) => {
   let credentials = req.body;
+  try {
+    let auth = await checkEmailAndPassword(
+      credentials.email,
+      credentials.password
+    );
+   
+      let payload = {
+        id: auth.user.uid,
+        fullname: "Álex Martín",
+        profile: "superadmin",
+      };
 
-  if (credentials.email === "alex@test.es" && credentials.password === "test") {
-    let payload = {
-      id: 1,
-      fullname: "Álex Martín",
-      profile: "superadmin",
-    };
-
-    let token = jwt.sign(payload, JWT_PASSWORD);
-    res.json({ token });
-  } else {
-    res.status(401).json({ mmessage: "Credenciales incorrectas" });
+      let token = jwt.sign(payload, JWT_PASSWORD);
+      res.json({ token });
+   
+  } catch (e) {
+    res.status(401).json({ message: e.message });
   }
 });
 
 app.get("/orders", mustAuth(), async (req, res) => {
-	let orders = await Order.find()
-  	res.json(orders);
+  let orders = await Order.find({ uid: req.user.id });
+  res.json(orders);
 });
 
 app.post("/orders", mustAuth(), async (req, res) => {
@@ -49,12 +72,13 @@ app.post("/orders", mustAuth(), async (req, res) => {
   try {
     let newOrder = await new Order({
       title: title,
+      uid: req.user.id,
       user: req.user.fullname,
     }).save();
 
     res.json(newOrder);
   } catch (e) {
-	  res.status(500).json({error: e})
+    res.status(500).json({ error: e });
   }
 });
 

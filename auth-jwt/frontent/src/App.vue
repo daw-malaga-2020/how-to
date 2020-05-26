@@ -10,9 +10,18 @@
     </ul>
     <br/>
     <div class="formulario" v-if="!isAuth">
-        <label>Usuario: <input type="text" v-model="user" ></label>
-        <label>Contraseña <input type="password" v-model="pass"></label>
-        <button @click="login">Login</button>
+        <div v-if="showLogin">
+          <h3>Login <small><a href="#" @click="showLogin=false">¿crear cuenta?</a></small></h3>
+           <label>Usuario: <input type="text" v-model="user" ></label>
+          <label>Contraseña <input type="password" v-model="pass"></label>
+          <button @click="login">Login</button>
+        </div>
+        <div v-else>
+          <h3>Crear cuenta <small><a href="#" @click="showLogin=true">¿ya tienes cuenta?</a></small></h3>
+          <label>Usuario: <input type="text" v-model="user" ></label>
+          <label>Contraseña <input type="password" v-model="pass"></label>
+          <button @click="createUser">Crear cuenta</button>
+        </div>
     </div>
     <div v-else>
       <button @click="getOrders">Realizar llamada autenticada</button>
@@ -28,6 +37,8 @@
 
 <script>
 
+// import firebase from 'firebase'
+
 export default {
   name: 'App',
   data(){
@@ -36,6 +47,7 @@ export default {
       user: "alex@test.es",
       pass: "test",
       orders: [],
+      showLogin: true
     }
   },
   mounted() {
@@ -51,10 +63,19 @@ export default {
       let response = await this.$http.get("http://localhost:3000/orders", config)
       this.orders = response.data
     },
+   
     checkAuth(){
-      this.isAuth = window.localStorage.getItem("token")
+      this.isAuth = window.localStorage.getItem("token")!= null
     },
-    logout(){
+    async createUser(){
+      try{
+        // let auth = await firebase.auth().createUserWithEmailAndPassword(this.user,this.pass)
+        // console.log(auth.user.uid)
+      }catch(err){
+        alert(err.message)
+      }
+    },
+    async logout(){
       window.localStorage.removeItem("token")
       this.checkAuth()
     },

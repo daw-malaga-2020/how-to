@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 let orderSchema = new Schema( {
 	title: {type: String, required: true},
+	uid: {type: String, required: true},
 	user: {type: String, required: true},
 })
 
