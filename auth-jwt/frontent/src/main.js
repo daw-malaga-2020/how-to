@@ -18,6 +18,9 @@ import * as firebase from "firebase";
 
 // firebase.initializeApp(firebaseConfig);
 
+
+axios.defaults.baseURL = "https://auth-jwt-firebase.herokuapp.com/";
+
 Vue.use(VueAxios, axios);
 Vue.config.productionTip = false;
 

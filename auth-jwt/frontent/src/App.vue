@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>Cómo hacer una petición autentificada</h1>
+    <h1>Cómo hacer una petición autentificada con JWT y Firebase</h1>
     <ul>
       <li>Creamos un formulario y enviamos al servidor usuario y contraseña</li>
       <li>El servidor verifica si esas credenciales son válidas y devuelve un token JWT</li>
@@ -60,7 +60,7 @@ export default {
             'Authorization': `Bearer ${window.localStorage.getItem("token")}`
         }
       }
-      let response = await this.$http.get("http://localhost:3000/orders", config)
+      let response = await this.$http.get("orders", config)
       this.orders = response.data
     },
    
@@ -85,7 +85,7 @@ export default {
         password: this.pass
       }
       try{
-        let response = await this.$http.post("http://localhost:3000/auth/login", loginData)
+        let response = await this.$http.post("auth/login", loginData)
         window.localStorage.setItem("token",response.data.token)
         this.checkAuth()
       }catch(e){

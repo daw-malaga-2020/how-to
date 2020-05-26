@@ -8,22 +8,14 @@ const jwt = require("jsonwebtoken");
 const firebase = require("firebase");
 const cors = require("cors");
 const { json } = require("express");
+const config = require("./config");
 const Order = require("./models/orders");
 const app = express();
 
 const JWT_PASSWORD = "supersecretpassword";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDepPtuqXIYAXQCLjx4myMMsn4UyrNn6TQ",
-  authDomain: "fir-ad324.firebaseapp.com",
-  databaseURL: "https://fir-ad324.firebaseio.com",
-  projectId: "fir-ad324",
-  storageBucket: "fir-ad324.appspot.com",
-  messagingSenderId: "749478724956",
-  appId: "1:749478724956:web:4fb0f9f091f2d70f9a2d99",
-};
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(config.firebaseConfig);
 
 app.use(json());
 app.use(cors());
@@ -58,6 +50,20 @@ app.post("/auth/login", async (req, res) => {
     res.status(401).json({ message: e.message });
   }
 });
+app.post("/users", (req, res) => {
+
+  // Obtener del request los datos del usuario (p.ej: nombre,a pellidos, email, password, y otros datos adicionaless)
+  // Guarda el usuario en firebase con email y password. Firebase me devuelve uid
+  // Guardar el resto de datos (nombre, apelidos y otros datos, así como uid) en una tabla de mongo
+
+  /*
+  { _id: "id_de_mongo"},
+  {uid."id de firebase"},
+  {nombre: "nombre del usuario"},
+  {apellidos: "apellidos del usuario"},
+  {otros: "otros datos del usuario"},
+  */
+})
 
 app.get("/orders", mustAuth(), async (req, res) => {
   let orders = await Order.find({ uid: req.user.id });
@@ -84,10 +90,10 @@ app.post("/orders", mustAuth(), async (req, res) => {
 
 async function connectDatabase() {
   let db = mongoose.connection;
-  let dbURL =
-    "mongodb+srv://demo-user:test@demo-auth-cluster-x1sq0.mongodb.net/test?retryWrites=true&w=majority";
+
+
   try {
-    await mongoose.connect(dbURL, {
+    await mongoose.connect(config.mongoConfig, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
